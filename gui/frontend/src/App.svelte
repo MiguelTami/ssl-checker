@@ -124,7 +124,7 @@
   .grade-a { color: #28a745; }
   .grade-bad { color: #dc3545; }
   
-  .info-section .card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 4px solid #007bff; }
+  .info-section .card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 4px solid #007bff;color: #000000; }
   .pulse { animation: pulse 1.5s infinite; color: #666; }
   @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 </style>
