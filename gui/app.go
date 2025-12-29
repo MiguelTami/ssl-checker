@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"go/scanner"
 	"gui/internal/ssl"
 )
 
