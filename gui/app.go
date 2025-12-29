@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"go/scanner"
+	"gui/internal/ssl"
 )
 
 // App struct
@@ -21,7 +23,8 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+// AnalyzeDomain returns a greeting for the given name
+func (a *App) AnalyzeDomain(domain string) (*ssl.SSLResult, error) {
+	scanner := ssl.NewScanner()
+	return scanner.Analyze(domain, nil)
 }
