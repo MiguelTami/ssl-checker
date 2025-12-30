@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"gui/internal/ssl"
+	"github.com/MiguelTami/ssl-checker/pkg/ssl"
 )
 
 // App struct

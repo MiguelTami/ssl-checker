@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/MiguelTami/ssl-checker/internal/ssl"
+	"github.com/MiguelTami/ssl-checker/pkg/ssl"
 	"flag"
 	"fmt"
 	"os"

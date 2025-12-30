@@ -1,8 +1,13 @@
 module gui
 
-go 1.23
+go 1.25.5
 
-require github.com/wailsapp/wails/v2 v2.11.0
+replace github.com/MiguelTami/ssl-checker => ../
+
+require (
+	github.com/MiguelTami/ssl-checker v0.0.0-00010101000000-000000000000
+	github.com/wailsapp/wails/v2 v2.11.0
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
