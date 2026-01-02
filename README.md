@@ -69,6 +69,7 @@ go run ./cmd/cli -d google.com
 ## Arquitectura del proyecto:
 Este proyecto sigue el principio DRY (Don't Repeat Yourself) mediante una estructura de paquetes organizada:
 
+```text
 ssl-checker/
 ├── cmd/
 │   └── cli/           # 🖥️ Entrypoint: Versión de Terminal (CLI)
@@ -84,6 +85,7 @@ ssl-checker/
 │                      # Es accesible tanto por 'cmd' como por 'gui'.
 │
 └── go.mod             # Definición del módulo raíz
+```
 
 ## Compilación (Build)
 Para generar los archivos ejecutables finales (.exe / .app) para distribuir la aplicación:
