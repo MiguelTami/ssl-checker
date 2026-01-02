@@ -5,3 +5,7 @@
 export function AnalyzeDomain(arg1) {
   return window['go']['main']['App']['AnalyzeDomain'](arg1);
 }
+
+export function CancelAnalysis() {
+  return window['go']['main']['App']['CancelAnalysis']();
+}

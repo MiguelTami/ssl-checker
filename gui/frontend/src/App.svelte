@@ -1,27 +1,53 @@
 <script>
   // Esta importación la genera Wails automáticamente al compilar
-  import {AnalyzeDomain} from '../wailsjs/go/main/App';
+  import {AnalyzeDomain, CancelAnalysis} from '../wailsjs/go/main/App';
+  import {EventsOn} from '../wailsjs/runtime';
+  import {onMount} from 'svelte';
 
   let domain = "";
   let result = null;
   let loading = false;
   let errorMsg = "";
+  let progressText = "Esperando...";
   let activeTab = 'analizar'; // Control de pestañas
+
+    EventsOn("scan-progress", (msg) => {
+      console.log("Evento recibido:", msg); // Log para depurar en consola del navegador (F12)
+      progressText = msg;
+    });
+
 
   async function startScan() {
     if (!domain) return;
     loading = true;
     errorMsg = "";
     result = null;
+    progressText = "Iniciando análisis...";
 
     try {
       // Llamada directa a tu función de Go
       result = await AnalyzeDomain(domain);
     } catch (err) {
+      if (err.includes("cancelado")) {
+        progressText = "Análisis cancelado.";
+      } else
       errorMsg = "Error: " + err;
     } finally {
       loading = false;
     }
+  }
+
+  function cancel() {
+    CancelAnalysis();
+  }
+
+  function getGradeColor(grade) {
+    if (!grade) return 'gray';
+    const g = grade.toUpperCase();
+    if (g.startsWith('A')) return '#28a745'; // Verde
+    if (g.startsWith('B') || g.startsWith('C')) return '#fd7e14'; // Naranja
+    if (g.startsWith('D') || g.startsWith('E') || g.startsWith('F')) return '#dc3545'; // Rojo
+    return '#6c757d'; // Default
   }
 </script>
 
@@ -35,14 +61,18 @@
     <div class="content">
       <h1>Verificador SSL Labs</h1>
       <div class="input-group">
-        <input bind:value={domain} placeholder="google.com" disabled={loading} type="text"/>
-        <button on:click={startScan} disabled={loading}>
-          {loading ? 'Analizando (Espere...)' : 'Analizar'}
-        </button>
+        <input bind:value={domain} placeholder="google.com" disabled={loading} type="text" on:keydown={(e) => e.key === 'Enter' && startScan()}/>
+        {#if !loading}
+          <button on:click={startScan} class="btn-primary">Analizar</button>
+        {:else}
+          <button on:click={cancel} class="btn-danger">Cancelar</button>
+        {/if}
       </div>
 
       {#if loading}
-        <p class="pulse">Contactando con SSL Labs...</p>
+        <div class="progress-container">
+          <div class="progress-bar"></div> </div>
+        <p class="status-text">{progressText}</p>
       {/if}
 
       {#if errorMsg}
@@ -66,7 +96,7 @@
               {#each result.endpoints as ep}
                 <tr>
                   <td>{ep.ipAddress}</td>
-                  <td class="grade {ep.grade?.startsWith('A') ? 'grade-a' : 'grade-bad'}">
+                  <td class="grade" style="color: {getGradeColor(ep.grade)}">
                     {ep.grade || '-'}
                   </td>
                   <td>{ep.statusMessage}</td>
@@ -106,7 +136,6 @@
 </main>
 
 <style>
-  /* Estilos básicos para que se vea profesional */
   main { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
   nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; }
   nav button { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; opacity: 0.6; }
@@ -121,10 +150,23 @@
   th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
   
   .grade { font-weight: bold; font-size: 1.2em; }
-  .grade-a { color: #28a745; }
-  .grade-bad { color: #dc3545; }
+
+  .progress-container {
+    width: 100%;
+    height: 6px;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    width: 50%;
+    animation: indeterminate 1.5s infinite ease-in-out;
+  }
+  .status-text { text-align: center; color: #666; font-size: 0.9em; margin-top: 8px;}
   
   .info-section .card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 4px solid #007bff;color: #000000; }
-  .pulse { animation: pulse 1.5s infinite; color: #666; }
   @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 </style>

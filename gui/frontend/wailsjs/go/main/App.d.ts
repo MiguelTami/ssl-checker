@@ -3,3 +3,5 @@
 import {ssl} from '../models';
 
 export function AnalyzeDomain(arg1:string):Promise<ssl.SSLResult>;
+
+export function CancelAnalysis():Promise<void>;

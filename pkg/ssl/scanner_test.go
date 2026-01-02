@@ -1,6 +1,7 @@
 package ssl
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -54,7 +55,7 @@ func TestAnalyze_Success(t *testing.T) {
 	scanner.BaseURL = mockServer.URL
 
 	// C. Ejecutar el análisis
-	result, err := scanner.Analyze("test.com", nil)
+	result, err := scanner.Analyze(context.Background(), "test.com", nil)
 
 	// D. Validaciones (Asserts)
 	if err != nil {

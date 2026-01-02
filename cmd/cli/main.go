@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/MiguelTami/ssl-checker/pkg/ssl"
+	"context"
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/MiguelTami/ssl-checker/pkg/ssl"
 )
 
 func main() {
@@ -24,7 +26,6 @@ func main() {
 	// Canal para recibir actualizaciones de estado 
 	progressChan := make(chan string)
 	
-	// Goroutine para imprimir los mensajes del canal
 	go func() {
 		for msg := range progressChan {
 			fmt.Printf("\r>> Estado: %-50s", msg) 
@@ -34,7 +35,7 @@ func main() {
 	scanner := ssl.NewScanner()
 	fmt.Printf("--- Iniciando análisis para: %s ---\n", domain)
 
-	result, err := scanner.Analyze(domain, progressChan)
+	result, err := scanner.Analyze(context.Background(), domain, progressChan)
 	close(progressChan) 
 	fmt.Println()       
 

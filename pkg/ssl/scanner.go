@@ -1,6 +1,7 @@
 package ssl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,8 +11,7 @@ import (
 )
 
 const (
-	pollInterval = 10 * time.Second
-	maxRetries   = 3 
+	maxRetries = 3
 )
 
 type Scanner struct {
@@ -21,20 +21,23 @@ type Scanner struct {
 
 func NewScanner() *Scanner {
 	return &Scanner{
-		client: &http.Client{Timeout: 30 * time.Second}, 
+		client: &http.Client{Timeout: 30 * time.Second},
 		BaseURL: "https://api.ssllabs.com/api/v2/analyze",
 	}
 }
 
-// Analyze gestiona el ciclo de vida completo del análisis (Polling)
-// Acepta un canal 'progress' para notificar a la GUI o Consola qué está pasando
-func (s *Scanner) Analyze(domain string, progress chan<- string) (*SSLResult, error) {
+func (s *Scanner) Analyze(ctx context.Context, domain string, progress chan<- string) (*SSLResult, error) {
 	domain = cleanDomain(domain)
-	
 	url := fmt.Sprintf("%s?host=%s&all=done", s.BaseURL, domain)
 	failCount := 0
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, errors.New("análisis cancelado por el usuario")
+		default:
+		}
+
 		if progress != nil {
 			progress <- "Consultando estado..."
 		}
@@ -49,12 +52,18 @@ func (s *Scanner) Analyze(domain string, progress chan<- string) (*SSLResult, er
 			if progress != nil {
 				progress <- fmt.Sprintf("Error de red (%d/%d), reintentando...", failCount, maxRetries)
 			}
-			time.Sleep(5 * time.Second)
-			continue
+			
+			select {
+			case <-ctx.Done():
+				return nil, errors.New("análisis cancelado")
+			case <-time.After(5 * time.Second):
+				continue
+			}
 		}
-		
+
 		failCount = 0
 
+		// Máquina de estados según la respuesta de SSL Labs
 		switch result.Status {
 		case "READY":
 			if progress != nil {
@@ -69,11 +78,20 @@ func (s *Scanner) Analyze(domain string, progress chan<- string) (*SSLResult, er
 			}
 		default:
 			if progress != nil {
-				progress <- "Analizando protocolos y certificados..."
+				msg := "Analizando protocolos..."
+				if result.Status != "" {
+					msg = result.Status
+				}
+				progress <- msg
 			}
 		}
 
-		time.Sleep(pollInterval)
+		select {
+		case <-ctx.Done():
+			return nil, errors.New("análisis cancelado")
+		case <-time.After(10 * time.Second):
+			continue
+		}
 	}
 }
 
@@ -98,6 +116,7 @@ func (s *Scanner) fetchOne(url string) (*SSLResult, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
+	
 	return &result, nil
 }
 
