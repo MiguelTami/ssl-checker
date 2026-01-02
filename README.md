@@ -30,6 +30,12 @@ La interfaz gráfica (`gui/frontend`) no es una simple página web incrustada, e
 * **Plantilla Base:** Wails Svelte Template (Vanilla JavaScript).
 * **Comunicación:** Utiliza el runtime de Wails para invocar funciones de Go como si fueran promesas de JavaScript nativas.
 
+## Clonar el repositorio
+```bash
+git clone [https://github.com/MiguelTami/ssl-checker.git](https://github.com/MiguelTami/ssl-checker.git)
+cd ssl-checker
+```
+
 ## Configurar dependencias del Backend (Raíz)
 Descarga las librerías necesarias para el módulo principal y la CLI.
 ```bash
