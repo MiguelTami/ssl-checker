@@ -21,7 +21,7 @@ func TestCleanDomain(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		result := cleanDomain(table.input) // Asegúrate que cleanDomain sea accesible (o exportada)
+		result := cleanDomain(table.input)
 		if result != table.expected {
 			t.Errorf("Entrada: %s, Esperado: %s, Obtenido: %s", table.input, table.expected, result)
 		}
@@ -29,16 +29,13 @@ func TestCleanDomain(t *testing.T) {
 }
 
 // 2. Prueba de Integración Simulada (Mocking)
-// Verificamos que Scanner procese bien una respuesta JSON correcta
 func TestAnalyze_Success(t *testing.T) {
 	// A. Crear un servidor falso que simula ser SSL Labs
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verificamos que el scanner esté llamando a la URL correcta
 		if r.URL.Query().Get("host") != "test.com" {
 			t.Errorf("El scanner no envió el host correcto")
 		}
 
-		// Devolvemos una respuesta falsa de éxito (READY)
 		fakeResponse := SSLResult{
 			Host:   "test.com",
 			Status: "READY",
@@ -48,7 +45,7 @@ func TestAnalyze_Success(t *testing.T) {
 		}
 		json.NewEncoder(w).Encode(fakeResponse)
 	}))
-	defer mockServer.Close() // Apagar el servidor al terminar
+	defer mockServer.Close()
 
 	// B. Configurar nuestro scanner para usar el servidor falso
 	scanner := NewScanner()
